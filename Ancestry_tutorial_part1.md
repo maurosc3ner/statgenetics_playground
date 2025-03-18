@@ -1,7 +1,7 @@
 # 1 Introduction
 
 This tutorial is intended to estimate genetic ancestry using R. It is a
-code reproduciton of Prive et al., “Using the UK Biobank as a global
+code reproduction of Prive et al., “Using the UK Biobank as a global
 reference of worldwide populations: application to measuring ancestry
 diversity from GWAS summary statistics.” Bioinformatics (2022). Compared
 to other ancestry tools (e.g., RFmix), this is a programming-driven
