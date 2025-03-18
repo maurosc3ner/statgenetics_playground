@@ -1,5 +1,5 @@
 # Statistical Genetics Playground
-This is my playground repo for my learning process of statistical genetics. Here, I focus on trying to complete a typical stack of stats related task. Classical tasks from the basics (Quality control, pruning) to the more complex ones (gwas population stratification, ancestry, PRS) are part of this repository notebooks, 
+This is my playground repo for my learning process of statistical genetics. Here, I focus on trying to complete a typical stack of stats related task. Classical tasks from the basics (Quality control, pruning) to the more complex ones (gwas, population stratification, ancestry, PRS) are part of this repository notebooks, 
 
 ## Frameworks and Tools
 1. PLINK 
