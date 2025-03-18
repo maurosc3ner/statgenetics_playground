@@ -11,7 +11,10 @@ This is my playground repo for my learning process of statistical genetics. Here
 2. GWAS
    * QC in Python (All of Us' example)
    * Population stratification in Hail (All of Us' example)
-3. Ancestry (Tbd)
+3. Estimating global genetic ancestry using Bigsnpr package and UK Biobank 
+   * Ancestry proportions from allele frequencies only
+([Part 1](https://github.com/maurosc3ner/statgenetics_playground/blob/main/Ancestry_tutorial_part1.md#2-estimating-ancestry-proportions-from-allele-frequencies-only))
+   * Individual-level ancestry proportions from genotyped data ([Part 2](https://github.com/maurosc3ner/statgenetics_playground/blob/main/Ancestry_tutorial_part1.md#3-estimating-ancestry-proportions-from-genotyped-data))
 4. Polygenic risk scores (PRS)
    * QC ([Part 1](https://github.com/maurosc3ner/statgenetics_playground/blob/main/PRS_tutorial_part1.md))
    * C+T ([Part 2](https://github.com/maurosc3ner/statgenetics_playground/blob/main/PRS_tutorial_part2.md))
