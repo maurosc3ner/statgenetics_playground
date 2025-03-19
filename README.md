@@ -1,6 +1,6 @@
 # Statistical Genetics Playground
 
-![23 and Me](ancestry23.png)
+![23 and Me](ancestry23_gif.gif)
 
 This is my playground repo for my learning process of statistical genetics. Here, I focus on trying to complete a typical stack of stats related task. Classical tasks from the basics (Quality control, pruning) to the more complex ones (gwas, population stratification, ancestry, PRS) are part of this repository notebooks, 
 
