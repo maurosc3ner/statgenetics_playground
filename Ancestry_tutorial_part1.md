@@ -353,12 +353,14 @@ Those who are still NA, are probably admixed (non-dominant ancestry).
 
 ``` r
 t3200_ancestry2<-cbind.data.frame(t3200_ancestry, Assigned_group = cluster) %>% 
-  mutate(Assigned_group=ifelse(is.na(Assigned_group),"Admixed",Assigned_group))
+  mutate(Assigned_group=ifelse(is.na(Assigned_group),"Admixed",Assigned_group)
+         )
 
 t3200_ancestry3<-cbind.data.frame(t3200_ancestry2,all_proj[, 2:3])
 colnames(t3200_ancestry3)[11:12]<-c("PC1","PC2")
-t3200_ancestry3 %>% 
-    head()
+t3200_ancestry3<-t3200_ancestry3 %>% 
+  mutate(myId=row_number()) 
+t3200_ancestry3 %>% head()
 ```
 
     ##   paternal.ID maternal.ID sex affection Africa Middle East Europe South America
@@ -368,13 +370,13 @@ t3200_ancestry3 %>%
     ## 4           0           0   2         2   40.3         0.0   59.7           0.0
     ## 5           0           0   2         2   84.0         0.0    8.4           0.0
     ## 6           0           0   2         2   91.6         0.0    5.1           0.0
-    ##   Asia Assigned_group        PC1         PC2
-    ## 1  0.0         Africa 0.05202893 0.012073915
-    ## 2  6.0         Africa 0.04509792 0.006391317
-    ## 3  0.1         Africa 0.04844047 0.010451295
-    ## 4  0.0        Admixed 0.01944043 0.010856108
-    ## 5  7.5         Africa 0.05186429 0.005025778
-    ## 6  3.3         Africa 0.05399439 0.009683217
+    ##   Asia Assigned_group        PC1         PC2 myId
+    ## 1  0.0         Africa 0.05202893 0.012073915    1
+    ## 2  6.0         Africa 0.04509792 0.006391317    2
+    ## 3  0.1         Africa 0.04844047 0.010451295    3
+    ## 4  0.0        Admixed 0.01944043 0.010856108    4
+    ## 5  7.5         Africa 0.05186429 0.005025778    5
+    ## 6  3.3         Africa 0.05399439 0.009683217    6
 
 ``` r
 ggplot(t3200_ancestry3,aes(x=PC1,y=PC2,col=Assigned_group,shape = Assigned_group,group =Assigned_group ) )+
@@ -388,7 +390,188 @@ ggplot(t3200_ancestry3,aes(x=PC1,y=PC2,col=Assigned_group,shape = Assigned_group
 
 ![](Ancestry_tutorial_part1_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
-# 4 References
+# 4 Create your own 23andMe ancestry map
+
+``` r
+library("sf")
+library("ggrepel")
+# library()
+library("rnaturalearth")
+library("rnaturalearthdata")
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+levels(factor(world$subregion))
+```
+
+    ##  [1] "Antarctica"                "Australia and New Zealand"
+    ##  [3] "Caribbean"                 "Central America"          
+    ##  [5] "Central Asia"              "Eastern Africa"           
+    ##  [7] "Eastern Asia"              "Eastern Europe"           
+    ##  [9] "Melanesia"                 "Micronesia"               
+    ## [11] "Middle Africa"             "Northern Africa"          
+    ## [13] "Northern America"          "Northern Europe"          
+    ## [15] "Polynesia"                 "Seven seas (open ocean)"  
+    ## [17] "South America"             "South-Eastern Asia"       
+    ## [19] "Southern Africa"           "Southern Asia"            
+    ## [21] "Southern Europe"           "Western Africa"           
+    ## [23] "Western Asia"              "Western Europe"
+
+``` r
+world %>%
+  filter(subregion=="Western Asia") %>% 
+  select(admin,subregion) %>% 
+  print()
+```
+
+    ## Simple feature collection with 19 features and 2 fields
+    ## Geometry type: MULTIPOLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: 25.66895 ymin: 12.31899 xmax: 59.8375 ymax: 43.56978
+    ## Geodetic CRS:  WGS 84
+    ## First 10 features:
+    ##                   admin    subregion                       geometry
+    ## 1                 Yemen Western Asia MULTIPOLYGON (((53.08564 16...
+    ## 2  United Arab Emirates Western Asia MULTIPOLYGON (((56.29785 25...
+    ## 3                Turkey Western Asia MULTIPOLYGON (((25.97002 40...
+    ## 4                 Syria Western Asia MULTIPOLYGON (((35.89268 35...
+    ## 5          Saudi Arabia Western Asia MULTIPOLYGON (((36.90166 25...
+    ## 6                 Qatar Western Asia MULTIPOLYGON (((51.26797 24...
+    ## 7                  Oman Western Asia MULTIPOLYGON (((58.72207 20...
+    ## 8               Lebanon Western Asia MULTIPOLYGON (((35.97627 34...
+    ## 9                Kuwait Western Asia MULTIPOLYGON (((48.27539 29...
+    ## 10               Jordan Western Asia MULTIPOLYGON (((35.7873 32....
+
+``` r
+world<-world %>% 
+  mutate(mygroup=ifelse(admin %in% c("Ecuador", "Colombia", "Venezuela","Peru","Brazil","Bolivia","Chile", "Uruguay", "Paraguay", "Argentina", "Suriname","Guyana"),"South America", NA)) %>% 
+  mutate(mygroup=ifelse(subregion %in% c("Northern Europe", "Southern Europe", "Western Europe","Eastern Europe"),"Europe", mygroup))%>% 
+  mutate(mygroup=ifelse(subregion %in% c("Northern Africa", "Southern Africa", "Western Africa","Eastern Africa","Middle Africa"),"Africa", mygroup))%>% 
+  mutate(mygroup=ifelse(subregion %in% c("Western Asia"),"Middle East", mygroup))%>% 
+  mutate(mygroup=ifelse(subregion %in% c("Northern Asia", "Southern Asia","Eastern Asia","Central Asia"),"Asia", mygroup))
+```
+
+``` r
+t3200_long<-pivot_longer(t3200_ancestry3,c("Africa", "Europe", "Middle East", "South America", "Asia"),
+                         names_to = "mygroup", 
+                         values_to = "ancestry")
+```
+
+After checking the dataset, it seems patient #71 is very admixed, #712
+is african, #1498 is hispanic , and 2821 is european. Let’s plot them
+together
+
+``` r
+ids<-c(712,71,2821,1498)
+world2<-world %>% 
+  left_join(t3200_long %>% filter(myId==ids[1]),by="mygroup")
+w2labels<-world2 %>% 
+  distinct(mygroup,.keep_all = T) %>% 
+  drop_na(mygroup)
+
+world3<-world %>% 
+  left_join(t3200_long %>% filter(myId==ids[2]),by="mygroup")
+w3labels<-world3 %>% 
+  distinct(mygroup,.keep_all = T) %>% 
+  drop_na(mygroup)
+
+world4<-world %>% 
+  left_join(t3200_long %>% filter(myId==ids[3]),by="mygroup")
+w4labels<-world4 %>% 
+  distinct(mygroup,.keep_all = T) %>% 
+  drop_na(mygroup)
+
+world5<-world %>% 
+  left_join(t3200_long %>% filter(myId==ids[4]),by="mygroup")
+w5labels<-world5 %>% 
+  distinct(mygroup,.keep_all = T) %>% 
+  drop_na(mygroup)
+```
+
+``` r
+a<-ggplot() +
+    geom_sf(data=world2,aes(fill = ancestry)) +
+    # scale_fill_viridis_c(option = "plasma",direction = -1,na.value="gray95") + 
+   scale_fill_distiller(palette= "YlOrBr",direction = 1,na.value="gray95")+
+    ggrepel::geom_label_repel(
+      data = w2labels,
+      aes(label = paste0(mygroup,": ",ancestry,"%"), 
+          geometry = geometry),
+      size=2.5,
+      stat = "sf_coordinates",
+      min.segment.length = 0.3
+    )+
+  labs(fill="Ancestry (%)",x="",y="",
+       subtitle=paste0("Ancestry contribution for patient #",ids[1],
+                       ",\n(Predominantly African Ancestry)"
+                       ))+
+  theme_bw()
+
+b<-ggplot(data = world3) +
+    geom_sf(aes(fill = ancestry)) +
+    # scale_fill_viridis_c(option = "plasma",direction = -1,na.value="gray95") + 
+    scale_fill_distiller(palette="Set1",na.value="gray95")+
+    ggrepel::geom_label_repel(
+        data = w3labels,
+        aes(label = paste0(mygroup,": ",ancestry,"%"), 
+            geometry = geometry),
+        size=2.5,
+        stat = "sf_coordinates",
+        min.segment.length = 0.3
+      )+
+  labs(fill="Ancestry (%)",x="",y="",
+       subtitle=paste0("Ancestry contribution for patient #",ids[2],
+                       ",\n(Admixed)"
+                       ))+
+  theme_bw()
+
+c<-ggplot(data = world4) +
+    geom_sf(aes(fill = ancestry)) +
+    # scale_fill_viridis_c(option = "plasma",direction = -1,na.value="gray95") + 
+    scale_fill_distiller(palette= "Blues",direction = 1,na.value="gray95")+
+
+    ggrepel::geom_label_repel(
+        data = w4labels,
+        aes(label = paste0(mygroup,": ",ancestry,"%"), 
+            geometry = geometry),
+        size=2.5,
+        stat = "sf_coordinates",
+        min.segment.length = 0.3
+      )+
+  labs(fill="Ancestry (%)",x="",y="",
+       subtitle=paste0("Ancestry contribution for patient #",ids[3],
+                       ",\n(Predominantly European Ancestry)")
+       )+
+  theme_bw()
+
+d<-ggplot() +
+    geom_sf(data = world5,aes(fill = ancestry)) +
+    # scale_fill_viridis_c(option = "plasma",direction = -1,na.value="gray95") + 
+    scale_fill_distiller(palette= "YlOrRd",direction = 1,na.value="gray95")+
+    ggrepel::geom_label_repel(
+        data = w5labels,
+        aes(label = paste0(mygroup,": ",ancestry,"%"), 
+            geometry = geometry),
+        size=2.5,
+        stat = "sf_coordinates",
+        min.segment.length = 0.3
+      )+
+  labs(fill="Ancestry (%)",x="",y="",
+       subtitle=paste0("Ancestry contribution for patient #",ids[4],
+                       ",\n(Predominantly Hispanic Ancestry)")
+       )+
+  theme_bw()
+final<-(b+a)/(d+c)
+final
+```
+
+![](Ancestry_tutorial_part1_files/figure-markdown_github/unnamed-chunk-22-1.png)
+
+``` r
+# ggsave(plot = b,"ancestryAdmixed.png",width =1800,height =1000, dpi = 300,units = "px")
+# ggsave(plot = final,"ancestry23.png",width =3600,height =2000, dpi = 300,units = "px")
+```
+
+# 5 References
 
 1.  Ancestry tutorial, Florian Privé
     [URL](https://privefl.github.io/bigsnpr/articles/ancestry.html)
