@@ -199,10 +199,14 @@ matched %>% head()
 
 ``` r
 # using index, we use 505,988 variants out of initial 1,748,250 variants in 3200 patients
-rds<-snp_readBed2(bedfile = "ancestry_datasets/TM3200_all.bed"
+bed.filename="ancestry_datasets/TM3200_all.bed"
+if (!file.exists(file="ancestry_datasets/TM3200_all.rds")) {
+  rds<-snp_readBed2(bedfile = bed.filename 
              , ind.col = matched$`_NUM_ID_.ss`
              )
-obj.bigsnp <- snp_attach(rds)
+}
+# rds<-readRDS("ancestry_datasets/TM3200_all.rds")
+obj.bigsnp <- snp_attach(rdsfile = "ancestry_datasets/TM3200_all.rds")
 
 G <- obj.bigsnp$genotypes
 hist(nb_na <- big_counts(G)[4, ])
@@ -232,15 +236,20 @@ plot(all_proj[, 2:3])
 
 ![](Ancestry_tutorial_part1_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
+Cross product between UK biobank PCs (at matched index) and UK biobank
+pre-calculated estimates.
+
 ``` r
 X <- crossprod(PROJ,
                as.matrix(ukbb_freqs[matched$`_NUM_ID_`[ind], -(1:5)]))
 ```
 
-Prive et al., provide PC loadings for 21 ancestry groups. For
-simplicity, we collapse their list into 5 groups:
+Prive et al., provide PC loadings for 21 ancestry groups derived from UK
+Biobanks. For educational purpose, I collapsed their list into 5 groups.
+You can work with your own groups too.
 
 ``` r
+#group collapsing for simplicity
 (groupnames<-colnames(ukbb_freqs)[-(1:5)])
 ```
 
@@ -570,6 +579,127 @@ final
 # ggsave(plot = b,"ancestryAdmixed.png",width =1800,height =1000, dpi = 300,units = "px")
 # ggsave(plot = final,"ancestry23.png",width =3600,height =2000, dpi = 300,units = "px")
 ```
+
+``` r
+sessioninfo::session_info()
+```
+
+    ## ─ Session info ───────────────────────────────────────────────────────────────
+    ##  setting  value
+    ##  version  R version 4.4.0 (2024-04-24)
+    ##  os       macOS Sonoma 14.7
+    ##  system   aarch64, darwin20
+    ##  ui       X11
+    ##  language (EN)
+    ##  collate  en_US.UTF-8
+    ##  ctype    en_US.UTF-8
+    ##  tz       America/New_York
+    ##  date     2025-03-20
+    ##  pandoc   3.1.11 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64/ (via rmarkdown)
+    ## 
+    ## ─ Packages ───────────────────────────────────────────────────────────────────
+    ##  package           * version date (UTC) lib source
+    ##  bigassertr          0.1.6   2023-01-10 [1] CRAN (R 4.4.1)
+    ##  bigparallelr        0.3.2   2021-10-02 [1] CRAN (R 4.4.0)
+    ##  bigreadr            0.2.5   2022-12-06 [1] CRAN (R 4.4.1)
+    ##  bigsnpr           * 1.12.18 2024-11-26 [1] CRAN (R 4.4.1)
+    ##  bigsparser          0.7.3   2024-09-06 [1] CRAN (R 4.4.1)
+    ##  bigstatsr         * 1.6.1   2024-09-09 [1] CRAN (R 4.4.1)
+    ##  broom.helpers       1.15.0  2024-04-05 [1] CRAN (R 4.4.0)
+    ##  class               7.3-22  2023-05-03 [1] CRAN (R 4.4.0)
+    ##  classInt            0.4-10  2023-09-05 [1] CRAN (R 4.4.0)
+    ##  cli                 3.6.2   2023-12-11 [1] CRAN (R 4.4.0)
+    ##  codetools           0.2-20  2024-03-31 [1] CRAN (R 4.4.0)
+    ##  colorspace          2.1-0   2023-01-23 [1] CRAN (R 4.4.0)
+    ##  cowplot             1.1.3   2024-01-22 [1] CRAN (R 4.4.0)
+    ##  data.table        * 1.15.4  2024-03-30 [1] CRAN (R 4.4.0)
+    ##  DBI                 1.2.2   2024-02-16 [1] CRAN (R 4.4.0)
+    ##  digest              0.6.35  2024-03-11 [1] CRAN (R 4.4.0)
+    ##  doParallel          1.0.17  2022-02-07 [1] CRAN (R 4.4.0)
+    ##  doRNG               1.8.6.1 2025-01-13 [1] CRAN (R 4.4.1)
+    ##  dplyr             * 1.1.4   2023-11-17 [1] CRAN (R 4.4.0)
+    ##  e1071               1.7-14  2023-12-06 [1] CRAN (R 4.4.0)
+    ##  evaluate            0.23    2023-11-01 [1] CRAN (R 4.4.0)
+    ##  fansi               1.0.6   2023-12-08 [1] CRAN (R 4.4.0)
+    ##  farver              2.1.2   2024-05-13 [1] CRAN (R 4.4.0)
+    ##  fastmap             1.2.0   2024-05-15 [1] CRAN (R 4.4.0)
+    ##  flock               0.7     2016-11-12 [1] CRAN (R 4.4.1)
+    ##  forcats           * 1.0.0   2023-01-29 [1] CRAN (R 4.4.0)
+    ##  foreach             1.5.2   2022-02-02 [1] CRAN (R 4.4.0)
+    ##  generics            0.1.3   2022-07-05 [1] CRAN (R 4.4.0)
+    ##  ggplot2           * 3.5.1   2024-04-23 [1] CRAN (R 4.4.0)
+    ##  ggrepel           * 0.9.5   2024-01-10 [1] CRAN (R 4.4.0)
+    ##  glue                1.7.0   2024-01-09 [1] CRAN (R 4.4.0)
+    ##  gridExtra           2.3     2017-09-09 [1] CRAN (R 4.4.0)
+    ##  gt                  0.10.1  2024-01-17 [1] CRAN (R 4.4.0)
+    ##  gtable              0.3.5   2024-04-22 [1] CRAN (R 4.4.0)
+    ##  gtsummary         * 1.7.2   2023-07-15 [1] CRAN (R 4.4.0)
+    ##  highr               0.10    2022-12-22 [1] CRAN (R 4.4.0)
+    ##  hms                 1.1.3   2023-03-21 [1] CRAN (R 4.4.0)
+    ##  htmltools           0.5.8.1 2024-04-04 [1] CRAN (R 4.4.0)
+    ##  httr                1.4.7   2023-08-15 [1] CRAN (R 4.4.0)
+    ##  iterators           1.0.14  2022-02-05 [1] CRAN (R 4.4.0)
+    ##  jsonlite            1.8.8   2023-12-04 [1] CRAN (R 4.4.0)
+    ##  KernSmooth          2.23-22 2023-07-10 [1] CRAN (R 4.4.0)
+    ##  knitr               1.46    2024-04-06 [1] CRAN (R 4.4.0)
+    ##  labeling            0.4.3   2023-08-29 [1] CRAN (R 4.4.0)
+    ##  lattice             0.22-6  2024-03-20 [1] CRAN (R 4.4.0)
+    ##  lifecycle           1.0.4   2023-11-07 [1] CRAN (R 4.4.0)
+    ##  lubridate         * 1.9.3   2023-09-27 [1] CRAN (R 4.4.0)
+    ##  magrittr            2.0.3   2022-03-30 [1] CRAN (R 4.4.0)
+    ##  Matrix              1.7-0   2024-03-22 [1] CRAN (R 4.4.0)
+    ##  munsell             0.5.1   2024-04-01 [1] CRAN (R 4.4.0)
+    ##  parallelly          1.37.1  2024-02-29 [1] CRAN (R 4.4.0)
+    ##  patchwork         * 1.2.0   2024-01-08 [1] CRAN (R 4.4.0)
+    ##  pillar              1.9.0   2023-03-22 [1] CRAN (R 4.4.0)
+    ##  pkgconfig           2.0.3   2019-09-22 [1] CRAN (R 4.4.0)
+    ##  proxy               0.4-27  2022-06-09 [1] CRAN (R 4.4.0)
+    ##  purrr             * 1.0.2   2023-08-10 [1] CRAN (R 4.4.0)
+    ##  quadprog            1.5-8   2019-11-20 [1] CRAN (R 4.4.0)
+    ##  R.methodsS3         1.8.2   2022-06-13 [1] CRAN (R 4.4.1)
+    ##  R.oo                1.27.0  2024-11-01 [1] CRAN (R 4.4.1)
+    ##  R.utils             2.13.0  2025-02-24 [1] CRAN (R 4.4.1)
+    ##  R6                  2.5.1   2021-08-19 [1] CRAN (R 4.4.0)
+    ##  RColorBrewer        1.1-3   2022-04-03 [1] CRAN (R 4.4.0)
+    ##  Rcpp                1.0.12  2024-01-09 [1] CRAN (R 4.4.0)
+    ##  readr             * 2.1.5   2024-01-10 [1] CRAN (R 4.4.0)
+    ##  rlang               1.1.3   2024-01-10 [1] CRAN (R 4.4.0)
+    ##  rmarkdown           2.27    2024-05-17 [1] CRAN (R 4.4.0)
+    ##  rmio                0.4.0   2022-02-17 [1] CRAN (R 4.4.1)
+    ##  rnaturalearth     * 1.0.1   2023-12-15 [1] CRAN (R 4.4.0)
+    ##  rnaturalearthdata * 1.0.0   2024-02-09 [1] CRAN (R 4.4.0)
+    ##  rngtools            1.5.2   2021-09-20 [1] CRAN (R 4.4.1)
+    ##  rstudioapi          0.16.0  2024-03-24 [1] CRAN (R 4.4.0)
+    ##  runonce             0.2.3   2021-10-02 [1] CRAN (R 4.4.0)
+    ##  s2                  1.1.6   2023-12-19 [1] CRAN (R 4.4.0)
+    ##  scales              1.3.0   2023-11-28 [1] CRAN (R 4.4.0)
+    ##  sessioninfo         1.2.2   2021-12-06 [1] CRAN (R 4.4.0)
+    ##  sf                * 1.0-16  2024-03-24 [1] CRAN (R 4.4.0)
+    ##  stringi             1.8.4   2024-05-06 [1] CRAN (R 4.4.0)
+    ##  stringr           * 1.5.1   2023-11-14 [1] CRAN (R 4.4.0)
+    ##  terra               1.7-71  2024-01-31 [1] CRAN (R 4.4.0)
+    ##  tibble            * 3.2.1   2023-03-20 [1] CRAN (R 4.4.0)
+    ##  tidyr             * 1.3.1   2024-01-24 [1] CRAN (R 4.4.0)
+    ##  tidyselect          1.2.1   2024-03-11 [1] CRAN (R 4.4.0)
+    ##  tidyverse         * 2.0.0   2023-02-22 [1] CRAN (R 4.4.0)
+    ##  timechange          0.3.0   2024-01-18 [1] CRAN (R 4.4.0)
+    ##  triebeard           0.4.1   2023-03-04 [1] CRAN (R 4.4.1)
+    ##  tzdb                0.4.0   2023-05-12 [1] CRAN (R 4.4.0)
+    ##  units               0.8-5   2023-11-28 [1] CRAN (R 4.4.0)
+    ##  urltools            1.7.3   2019-04-14 [1] CRAN (R 4.4.0)
+    ##  utf8                1.2.4   2023-10-22 [1] CRAN (R 4.4.0)
+    ##  vctrs               0.6.5   2023-12-01 [1] CRAN (R 4.4.0)
+    ##  viridis           * 0.6.5   2024-01-29 [1] CRAN (R 4.4.0)
+    ##  viridisLite       * 0.4.2   2023-05-02 [1] CRAN (R 4.4.0)
+    ##  withr               3.0.0   2024-01-16 [1] CRAN (R 4.4.0)
+    ##  wk                  0.9.1   2023-11-29 [1] CRAN (R 4.4.0)
+    ##  xfun                0.44    2024-05-15 [1] CRAN (R 4.4.0)
+    ##  xml2                1.3.6   2023-12-04 [1] CRAN (R 4.4.0)
+    ##  yaml                2.3.8   2023-12-11 [1] CRAN (R 4.4.0)
+    ## 
+    ##  [1] /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library
+    ## 
+    ## ──────────────────────────────────────────────────────────────────────────────
 
 # 5 References
 
